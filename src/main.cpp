@@ -1,158 +1,74 @@
-//
-// Includes
-//
+#include <Arduino.h>
 #include <IRremote.h>
-#include <SPI.h>
-#include <Ethernet.h>
+#include <Ethernet3.h>
 
-//
-// Globals
-//
-int RECV_PIN = 3;
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };    // Adapter MAC
-
-//
-// Inits
-//
-IRrecv irrecv(RECV_PIN);
+IRrecv irrecv(10); // IR receiver pin
 decode_results results;
 
-// Network settings for the Eth shield...
-byte gateway[] = { 192,168,0,1 };
-byte ip[] = { 192,168,0,223 };
-
-// IP of the Raspi and the connection context
-IPAddress server(192,168,0,234);  // Raspi DVR-IR Transmitter Server IP
+byte mac[] = { 0xDE, 0x1D, 0xBE, 0xE4, 0xFE, 0x5D };
+IPAddress ip(10, 0, 1, 197);
+IPAddress server(10, 0, 1, 26);
 EthernetClient client;
 
-
-/**
- * Bit shitty, but get a String (char*) for a remote code.
- * lirc only likes textual names for commands, not codes -.-
- */
-String get_rcode_name(long rcode)
-{
-  switch(rcode)
-  {
-    case  0x20DF30CF:
-      return "STAND_BY";
-    case  0x20DF50AF:
-      return "LOGIN_LOCK";
-    case  0x20DF807F:
-      return "NUM_1";
-    case  0x20DF40BF:
-      return "NUM_2";
-    case  0x20DFC03F:
-      return "NUM_3";
-    case  0x20DF20DF:
-      return "NUM_4";
-    case  0x20DFA05F:
-      return "NUM_5";
-    case  0x20DF609F:
-      return "NUM_6";
-    case  0x20DFE01F:
-      return "NUM_7";
-    case  0x20DF10EF:
-      return "NUM_8";
-    case  0x20DF906F:
-      return "NUM_9";
-    case  0x20DF18E7:
-      return "NUM_0";
-    case  0x20DF28D7:
-      return "GRID";
-    case  0x20DF08F7:
-      return "MENU";
-    case  0x20DF6897:
-      return "PTZ";
-    case 0x20DF7887:
-      return "EXIT";
-    case  0x20DF48B7:
-      return "DIR_UP";
-    case  0x20DFA857:
-      return "DIR_RIGHT";
-    case  0x20DFB847:
-      return "DIR_DOWN";
-    case  0x20DFF00F:
-      return "DIR_LEFT";
-    case  0x20DF00FF:
-      return "OK";
-    case  0x20DF9867:
-      return "PLUS";
-    case  0x20DF38C7:
-      return "MINUS";
-    case  0x20DF708F:
-      return "REC";
-    case  0x20DFB04F:
-      return "STOP";
-    case  0x20DFF807:
-      return "EXTRA";
-    case  0x20DFE817:
-      return "RW";
-    case  0x20DF8877:
-      return "PLAY";
-    case  0x20DF2AD5:
-      return "FF";
-    case  0x20DFD02F:
-      return "END";
-    case  0x20DFC837:
-      return "PLAY_STOP";
-    case  0x20DF58A7:
-      return "AUDIO";
-    case  0x20DFD827:
-      return "MUTE";
-  }
-
-  return "NOP";
-}
-
-void setup()
-{
-  // Open serial for debugging
+void setup() {
   Serial.begin(9600);
-
-  // Start the receiver
+  irrecv.blink13(true);
   irrecv.enableIRIn();
-
-  // Start ethernet
-  Ethernet.begin(mac, ip, gateway);
-}
-
-/**
- * Transmit a code over the network.
- */
-void tx_code(decode_results *results)
-{
-  if (results->decode_type == NEC && results->bits == 32)
-  {
-
-    // Diagnostics - serial
-    Serial.print(results->value, HEX);
-    Serial.print(" (");
-    Serial.print(results->bits, DEC);
-    Serial.println(" bits)");
-
-    // Make request
-    if (client.connect(server, 80))
-    {
-      client.print("GET /?code=");
-      client.print(get_rcode_name(results->value));
-      client.println(" HTTP/1.1");
-      client.println("Host: 198.211.121.22");
-      client.println();
-      client.println();
-      client.stop();
-    }
+  Serial.println("Started");
+  Ethernet.begin(mac, ip);
+  delay(1000);
+  Serial.println("connecting...");
+  if (client.connect(server, 8088)) {
+    Serial.println("connected");
+    client.println("GET /search?q=arduino HTTP/1.1");
+    client.println("Host: www.google.com");
+    client.println("Connection: close");
+    client.println();
+  } else {
+    Serial.println("connection failed");
   }
 }
 
-/**
- * Decode any received IR codes.
- */
-void loop()
-{
-  if (irrecv.decode(&results))
-  {
-    tx_code(&results);
-    irrecv.resume(); // Receive the next value
+String key(long code) {
+  switch(code) {
+    case 0x3ec12dd2: return "up";
+    case 0x3ec1cd32: return "down";
+    case 0x3ec1ad52: return "left";
+    case 0x3ec16d92: return "right";
+    case 0x3ec11de2: return "enter";
+    case 0x3EC1D12E: return "rec";
+    case 0x3EC1A15E: return "stop";
+    case 0x3EC1C13E: return "pause";
+    case 0x3EC141BE: return "play";
+    case 0x3EC1619E: return "back";
+    case 0x3EC1E11E: return "forward";
+    case 0x3EC19D62: return "prev";
+    case 0x3EC15DA2: return "next";
+    case 0x3EC129D6: return "1";
+    case 0x3EC1A956: return "2";
+    case 0x3EC16996: return "3";
+    case 0x3EC1E916: return "4";
+    case 0x3EC119E6: return "5";
+    case 0x3EC19966: return "6";
+    case 0x3EC159A6: return "7";
+    case 0x3EC1D926: return "8";
+    case 0x3EC139C6: return "9";
+    case 0x3EC1C936: return "0";
+    case 0x3EC1B946: return "plus10";
+    case 0x3EC17986: return "ent";
+  }
+  return String(code, HEX);
+}
+
+void loop() {
+  if (irrecv.decode(&results)) {
+    if(results.bits &&
+        results.value != 0xFDAC0152 &&
+        results.value != 0xFCABFFBF &&
+        results.value != 0xFCABFFBF &&
+        results.value != 0xFEAC02E5) {
+      Serial.println(key(results.value));
+    }
+    irrecv.resume();
   }
 }
