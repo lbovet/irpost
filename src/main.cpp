@@ -7,26 +7,15 @@ decode_results results;
 
 byte mac[] = { 0xDE, 0x1D, 0xBE, 0xE4, 0xFE, 0x5D };
 IPAddress ip(10, 0, 1, 197);
-IPAddress server(10, 0, 1, 26);
+IPAddress server(10, 0, 1, 52);
 EthernetClient client;
 
 void setup() {
   Serial.begin(9600);
   irrecv.blink13(true);
   irrecv.enableIRIn();
-  Serial.println("Started");
   Ethernet.begin(mac, ip);
-  delay(1000);
-  Serial.println("connecting...");
-  if (client.connect(server, 8088)) {
-    Serial.println("connected");
-    client.println("GET /search?q=arduino HTTP/1.1");
-    client.println("Host: www.google.com");
-    client.println("Connection: close");
-    client.println();
-  } else {
-    Serial.println("connection failed");
-  }
+  Serial.println("Started");
 }
 
 String key(long code) {
@@ -67,7 +56,19 @@ void loop() {
         results.value != 0xFCABFFBF &&
         results.value != 0xFCABFFBF &&
         results.value != 0xFEAC02E5) {
-      Serial.println(key(results.value));
+      String cmd = key(results.value);
+      Serial.println(cmd);
+      Serial.println("connecting...");
+      if (client.connect(server, 8088)) {
+        Serial.println("connected");
+        client.println("POST /castagnet/control/"+cmd+" HTTP/1.1");
+        client.println("Connection: close");
+        client.println();
+        client.println();
+        client.stop();
+      } else {
+        Serial.println("connection failed");
+      }
     }
     irrecv.resume();
   }
