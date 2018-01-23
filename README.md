@@ -14,5 +14,7 @@ Hardware:
 - [Wiznet W5500 Ethernet Shield](http://www.wiznet.io/product-item/w5500-ethernet-shield/)
 - [TOSP38238](https://www.adafruit.com/product/157)
 
-
-Using platformIO, dependencies are IRRemote and Ethernet3
+Software:
+- [PlatformIO](http://platformio.org/)
+- [IRRemote](http://platformio.org/lib/show/4/IRremote)
+- [Ethernet3](http://platformio.org/lib/show/1588/Ethernet3)
