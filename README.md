@@ -14,6 +14,8 @@ Hardware:
 - [Wiznet W5500 Ethernet Shield](http://www.wiznet.io/product-item/w5500-ethernet-shield/)
 - [TOSP38238](https://www.adafruit.com/product/157)
 
+<img height="160" src="https://user-images.githubusercontent.com/692124/35284215-81e1d8b6-005a-11e8-9655-e2e369a65f4a.png">
+
 Software:
 - [PlatformIO](http://platformio.org/)
 - [IRRemote](http://platformio.org/lib/show/4/IRremote)
