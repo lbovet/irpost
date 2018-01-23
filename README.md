@@ -1,8 +1,6 @@
 # irpost
 An Arduino project to transform Infrared Remote Control events to REST calls
 
-Inspired from https://damow.net/ir-over-ip/
-
 Remote Control codes are for [Yamaha AV Receiver RX-V461](https://www.cnet.com/products/yamaha-rx-v461-series/specs/). The API calls control [castagnet](https://github.com/lbovet/castagnet), a [ChromeCast client](https://en.wikipedia.org/wiki/Chromecast).
 
 <h2>
@@ -20,3 +18,5 @@ Software:
 - [PlatformIO](http://platformio.org/)
 - [IRRemote](http://platformio.org/lib/show/4/IRremote)
 - [Ethernet3](http://platformio.org/lib/show/1588/Ethernet3)
+
+Inspired from https://damow.net/ir-over-ip/
